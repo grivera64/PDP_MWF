@@ -1,0 +1,18 @@
+# Maven Build Files
+target/
+.settings/
+out/
+.project
+.classpath
+
+# Self-Compile Files
+bin/
+*.class
+
+# Sensor Networks
+*.sn
+
+# C/C++ Linker
+*.dll
+*.dylib
+*.so

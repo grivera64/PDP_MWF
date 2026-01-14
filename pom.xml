@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.grivera.pdp</groupId>
+  <artifactId>PDP_MWF</artifactId>
+  <version>0.1.0</version>
+
+  <name>PDP_MWF</name>
+  <url>https://github.com/grivera64/PDP_MWF</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>25</maven.compiler.source>
+    <maven.compiler.target>25</maven.compiler.target>
+    <exec.mainClass>io.grivera.pdp.RunModelTest</exec.mainClass>
+    <exec.jvmArgs>-Xms1G -Xmx24G -XX:+UseZGC -XX:ZUncommitDelay=30</exec.jvmArgs>
+  </properties>
+
+  <dependencies>
+    <!-- <dependency> -->
+    <!--   <groupId>junit</groupId> -->
+    <!--   <artifactId>junit</artifactId> -->
+    <!--   <version>4.11</version> -->
+    <!--   <scope>test</scope> -->
+    <!-- </dependency> -->
+    <dependency>
+      <groupId>com.google.ortools</groupId>
+      <artifactId>ortools-java</artifactId>
+      <version>9.12.4544</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
