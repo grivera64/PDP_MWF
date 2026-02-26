@@ -1,14 +1,7 @@
 package io.grivera.pdp.algo;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-// import java.util.Map;
-// import java.util.StringJoiner;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
 
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
@@ -20,10 +13,7 @@ import io.grivera.pdp.network.Network;
 import io.grivera.pdp.network.node.DataNode;
 import io.grivera.pdp.network.node.SensorNode;
 import io.grivera.pdp.network.node.StorageNode;
-import io.grivera.pdp.util.Doubles;
-import io.grivera.pdp.util.MathUtil;
 import io.grivera.pdp.util.Pair;
-import io.grivera.pdp.util.Tuple;
 
 public class MWFAlgorithm extends NetworkAlgorithm {
 

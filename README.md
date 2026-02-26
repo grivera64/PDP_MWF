@@ -8,8 +8,6 @@ A simulation for testing data preservation of base station-less networks (BSNs) 
 ---
 - [About](#about)
 - [Setup](#setup)
-- [Example](#example)
-  - [Terminal Output](#terminal-output)
 - [Authors](#authors)
 
 ## About
