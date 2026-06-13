@@ -17,6 +17,8 @@
     <maven.compiler.target>25</maven.compiler.target>
     <exec.mainClass>io.grivera.pdp.RunModelTest</exec.mainClass>
     <exec.jvmArgs>-Xms1G -Xmx24G -XX:+UseZGC -XX:ZUncommitDelay=30</exec.jvmArgs>
+	<native.access.flag>--enable-native-access=ALL-UNNAMED</native.access.flag>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
   </properties>
 
   <dependencies>
