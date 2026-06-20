@@ -30,7 +30,7 @@ import io.grivera.pdp.network.node.TransitionNode;
 import io.grivera.pdp.util.Tuple;
 
 /**
- * An implementation of a Network that contains Data and
+ * A HashMap-based implementation of a Network that contains Data and
  * Storage Sensor Nodes
  *
  * @see Network
