@@ -8,14 +8,14 @@ import io.grivera.pdp.network.Network;
 import io.grivera.pdp.network.node.DataNode;
 import io.grivera.pdp.network.node.StorageNode;
 
-public class GreedyAlgorithm extends NetworkAlgorithm {
+public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
     // private Map<SensorNode, List<Tuple<StorageNode, Long, List<SensorNode>>>> routes;
     private long totalValue;
     private long totalCost;
     private long totalProfit;
     private long totalPackets;
 
-    public GreedyAlgorithm(Network network) {
+    public GreedyPriorityAlgorithm(Network network) {
         super(network);
     }
 
