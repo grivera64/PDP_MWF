@@ -85,7 +85,7 @@ public class RunModelTest {
         for (int overflowPackets = 50; overflowPackets <= 100; overflowPackets += 10) {
             System.out.printf("======== d = %3d ========\n", overflowPackets);
             network.setOverflowPackets(overflowPackets);
-            algo = new GreedyAlgorithm(network);
+            algo = new GreedyPriorityAlgorithm(network);
             System.out.println("Running Greedy...");
             details = algo.run();
             System.out.println("Ran Greedy!");
