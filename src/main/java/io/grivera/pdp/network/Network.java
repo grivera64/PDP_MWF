@@ -3,7 +3,6 @@ package io.grivera.pdp.network;
 import io.grivera.pdp.network.node.DataNode;
 import io.grivera.pdp.network.node.SensorNode;
 import io.grivera.pdp.network.node.StorageNode;
-import io.grivera.pdp.network.node.TransitionNode;
 
 import java.util.List;
 import java.util.Map;
@@ -29,10 +28,6 @@ public interface Network {
     List<StorageNode> getStorageNodes();
 
     int getStorageNodeCount();
-
-    List<TransitionNode> getTransitionNodes();
-
-    int getTransitionNodeCount();
 
     /**
      * Tests whether all the nodes are directly or indirectly connected with each
@@ -128,6 +123,4 @@ public interface Network {
     DataNode getDataNodeById(int id);
 
     StorageNode getStorageNodeById(int id);
-
-    TransitionNode getTransitionNodeById(int id);
 }

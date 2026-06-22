@@ -21,12 +21,9 @@ import java.util.stream.Gatherers;
 
 import io.grivera.pdp.algo.Algorithm;
 import io.grivera.pdp.algo.MFAlgorithm;
-
 import io.grivera.pdp.network.node.DataNode;
 import io.grivera.pdp.network.node.SensorNode;
 import io.grivera.pdp.network.node.StorageNode;
-import io.grivera.pdp.network.node.TransitionNode;
-
 import io.grivera.pdp.util.Tuple;
 
 /**
@@ -40,7 +37,6 @@ public class HashMapSensorNetwork implements Network {
     private List<SensorNode> nodes;
     private List<DataNode> dNodes;
     private List<StorageNode> sNodes;
-    private List<TransitionNode> tNodes;
     private Map<SensorNode, Set<SensorNode>> graph;
 
     private final double width, length;
@@ -81,7 +77,6 @@ public class HashMapSensorNetwork implements Network {
 
         this.dNodes = new ArrayList<>(p);
         this.sNodes = new ArrayList<>(s);
-        this.tNodes = new ArrayList<>(N - s - p);
 
         /*
          * Init the Sensor Network to allow basic operations on it
@@ -145,12 +140,10 @@ public class HashMapSensorNetwork implements Network {
             SensorNode.resetCounter();
             StorageNode.resetCounter();
             DataNode.resetCounter();
-            TransitionNode.resetCounter();
 
             this.nodes = new ArrayList<>();
             this.sNodes = new ArrayList<>();
             this.dNodes = new ArrayList<>();
-            this.tNodes = new ArrayList<>();
 
             String[] lineArgs;
             double x, y;
@@ -172,8 +165,6 @@ public class HashMapSensorNetwork implements Network {
                                 Long.parseLong(lineArgs[3]));
                     case "s" ->
                         new StorageNode(x, y, this.transmissionRange, this.batteryCapacity, this.storageCapacity);
-                    case "t" ->
-                        new TransitionNode(x, y, this.transmissionRange, this.batteryCapacity);
                     default ->
                         throw new IOException();
                 };
@@ -181,10 +172,8 @@ public class HashMapSensorNetwork implements Network {
                 this.nodes.add(node);
                 if (node instanceof DataNode) {
                     this.dNodes.add((DataNode) node);
-                } else if (node instanceof StorageNode) {
-                    this.sNodes.add((StorageNode) node);
                 } else {
-                    this.tNodes.add((TransitionNode) node);
+                    this.sNodes.add((StorageNode) node);
                 }
                 lineNumber++;
             }
@@ -311,7 +300,6 @@ public class HashMapSensorNetwork implements Network {
         SensorNode.resetCounter();
         StorageNode.resetCounter();
         DataNode.resetCounter();
-        TransitionNode.resetCounter();
 
         /* Choose p random nodes to be Generator Nodes, the rest are Storage Nodes */
         int choice;
@@ -330,13 +318,10 @@ public class HashMapSensorNetwork implements Network {
                         packetValue);
                 this.dNodes.add((DataNode) sensorNode);
                 p--;
-            } else if ((choice < 8 && s > 0) || nodeCount - index - p - s <= 0) {
+            } else {
                 sensorNode = new StorageNode(x, y, this.transmissionRange, this.batteryCapacity, this.storageCapacity);
                 this.sNodes.add((StorageNode) sensorNode);
                 s--;
-            } else {
-                sensorNode = new TransitionNode(x, y, this.transmissionRange, this.batteryCapacity);
-                this.tNodes.add((TransitionNode) sensorNode);
             }
             nodes.add(sensorNode);
         }
@@ -404,16 +389,6 @@ public class HashMapSensorNetwork implements Network {
     @Override
     public int getStorageNodeCount() {
         return this.sNodes.size();
-    }
-
-    @Override
-    public List<TransitionNode> getTransitionNodes() {
-        return Collections.unmodifiableList(this.tNodes);
-    }
-
-    @Override
-    public int getTransitionNodeCount() {
-        return this.tNodes.size();
     }
 
     /**
@@ -823,14 +798,6 @@ public class HashMapSensorNetwork implements Network {
             throw new IndexOutOfBoundsException(String.format("Invalid SN ID %d", id));
         }
         return this.sNodes.get(id - 1);
-    }
-
-    @Override
-    public TransitionNode getTransitionNodeById(int id) {
-        if (id < 1 || id > this.getTransitionNodeCount()) {
-            throw new IndexOutOfBoundsException(String.format("Invalid TN ID %d", id));
-        }
-        return this.tNodes.get(id - 1);
     }
 
     public String toString() {
