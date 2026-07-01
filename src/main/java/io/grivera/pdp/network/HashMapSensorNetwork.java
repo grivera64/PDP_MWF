@@ -465,7 +465,18 @@ public class HashMapSensorNetwork implements Network {
      * {@inheritDoc}
      */
     @Override
+    public Map<SensorNode, Long> getMinCostFrom(SensorNode from) {
+        return getMinCostPathsFrom(this.graph, from);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public long calculateCostOfPath(List<SensorNode> path) {
+        if (path.size() < 2) {
+            throw new IllegalStateException("Invalid path: fewer than 2 nodes");
+        }
         return path.parallelStream()
                 .gather(Gatherers.windowSliding(2))
                 .filter(l -> l.size() == 2)
@@ -567,10 +578,12 @@ public class HashMapSensorNetwork implements Network {
 
             /* Find all paths from DN# -> SN#, Dummy */
             long profit;
+            Map<SensorNode, Long> minCostsFromDn;
             for (DataNode dn : this.dNodes) {
+                minCostsFromDn = this.getMinCostFrom(dn);
                 for (StorageNode sn : this.sNodes) {
                     writer.printf("c %s -> %s\n", dn.getName(), sn.getName());
-                    profit = this.calculateProfitOf(dn, sn);
+                    profit = dn.getOverflowPacketValue() - minCostsFromDn.get(sn);
                     writer.printf("a %d %d %d %d %d\n", dn.getUuid(), sn.getUuid(),
                             0, this.dataPacketCount, -profit);
                 }
@@ -634,6 +647,10 @@ public class HashMapSensorNetwork implements Network {
             }
         }
 
+        if (!start.equals(end) && !backPointers.containsKey(end)) {
+            return List.of();
+        }
+
         LinkedList<SensorNode> deque = new LinkedList<>();
         currNode = end;
         while (currNode != null) {
@@ -641,6 +658,44 @@ public class HashMapSensorNetwork implements Network {
             currNode = backPointers.getOrDefault(currNode, null);
         }
         return deque;
+    }
+
+    private Map<SensorNode, Long> getMinCostPathsFrom(Map<SensorNode, Set<SensorNode>> graph, SensorNode start) {
+        Queue<Tuple<SensorNode, Long, SensorNode>> q = new PriorityQueue<>(Comparator.comparing(Tuple::second));
+        Map<SensorNode, Long> distances = new HashMap<>();
+        distances.put(start, 0L);
+        for (SensorNode neighbor : graph.getOrDefault(start, Set.of())) {
+            if (!(start.canTransmitTo(neighbor, 1) && neighbor.canReceiveFrom(start, 1))) {
+                continue;
+            }
+            q.offer(Tuple.of(neighbor, this.getCost(start, neighbor), start));
+        }
+
+        Tuple<SensorNode, Long, SensorNode> currPair;
+        SensorNode currNode;
+        SensorNode prevNode;
+        long currCost;
+        while (!q.isEmpty()) {
+            currPair = q.poll();
+            currNode = currPair.first();
+            currCost = currPair.second();
+            prevNode = currPair.third();
+
+            if (distances.containsKey(currNode)) {
+                continue;
+            }
+
+            if (!(prevNode.canTransmitTo(currNode, 1) && currNode.canReceiveFrom(prevNode, 1))) {
+                continue;
+            }
+
+            distances.put(currNode, currCost);
+            for (SensorNode neighbor : graph.getOrDefault(currNode, Set.of())) {
+                q.offer(Tuple.of(neighbor, currCost + this.getCost(currNode, neighbor), currNode));
+            }
+        }
+
+        return distances;
     }
 
     private long getCost(SensorNode from, SensorNode to) {
@@ -719,14 +774,14 @@ public class HashMapSensorNetwork implements Network {
 
     @Override
     public void sendPackets(DataNode dn, StorageNode sn, long packets) {
-        if (!this.canSendPackets(dn, sn, packets)) {
+        List<SensorNode> path = this.getMinCostPath(dn, sn);
+        if (!this.canSendPacketsAlong(path, packets)) {
             throw new IllegalArgumentException(
                     String.format("Cannot send %d packets from %s (%d/%d packets left) -> %s (%d/%d space left)\n",
                             packets, dn.getName(), dn.getPacketsLeft(), this.dataPacketCount,
                             sn.getName(), sn.getSpaceLeft(), this.storageCapacity));
         }
 
-        List<SensorNode> path = this.getMinCostPath(dn, sn);
         this.sendPacketsAlong(path, packets);
     }
 

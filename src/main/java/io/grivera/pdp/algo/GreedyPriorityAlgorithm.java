@@ -1,11 +1,13 @@
 package io.grivera.pdp.algo;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import io.grivera.pdp.cli.ProgressBars;
 import io.grivera.pdp.network.Network;
 import io.grivera.pdp.network.node.DataNode;
+import io.grivera.pdp.network.node.SensorNode;
 import io.grivera.pdp.network.node.StorageNode;
 
 public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
@@ -40,15 +42,15 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
 
         // Process DataNodes sequentially
         for (DataNode dn : sortedDns) {
-            List<Map.Entry<StorageNode, Long>> sortedSns = network.getStorageNodes()
-                .parallelStream()
-                .map(sn -> Map.entry(sn, network.calculateMinCost(dn, sn)))
-                .sorted(Map.Entry.comparingByValue())
+            // Sort by cost (energy independent)
+            Map<SensorNode, Long> minCostsFromDn = network.getMinCostFrom(dn);
+            List<StorageNode> sortedSns = network.getStorageNodes()
+                .stream()
+                .filter(minCostsFromDn::containsKey)
+                .sorted(Comparator.comparing(minCostsFromDn::get)
+                    .thenComparingInt(SensorNode::getId))
                 .toList();
-            for (Map.Entry<StorageNode, Long> pair : sortedSns) {
-                StorageNode sn = pair.getKey();
-                long minCost = pair.getValue();
-
+            for (StorageNode sn : sortedSns) {
                 if (!dn.hasEnergy() || dn.isEmpty()) {
                     break;
                 }
@@ -57,14 +59,20 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
                 }
 
                 long packetsToSend = Math.min(dn.getPacketsLeft(), sn.getSpaceLeft());
-                if (packetsToSend <= 0 || !network.canSendPackets(dn, sn, packetsToSend)) {
+                if (packetsToSend <= 0) {
                     continue;
                 }
 
+                List<SensorNode> path = network.getMinCostPath(dn, sn);
+                if (path.size() < 2 || !network.canSendPacketsAlong(path, packetsToSend)) {
+                    continue;
+                }
+
+                long minCost = minCostsFromDn.get(sn);
                 this.totalValue += dn.getOverflowPacketValue() * packetsToSend;
                 this.totalCost += minCost * packetsToSend;
 
-                network.sendPackets(dn, sn, packetsToSend);
+                network.sendPacketsAlong(path, packetsToSend);
             }
         }
 
@@ -95,15 +103,15 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
         // Process DataNodes sequentially
         System.out.println("Greedy Run Progress Bar:");
         for (DataNode dn : ProgressBars.wrapped(sortedDns)) {
-            List<Map.Entry<StorageNode, Long>> sortedSns = network.getStorageNodes()
-                .parallelStream()
-                .map(sn -> Map.entry(sn, network.calculateMinCost(dn, sn)))
-                .sorted(Map.Entry.comparingByValue())
+            // Costs are distance-based (energy-independent); compute once per DN for sorting
+            Map<SensorNode, Long> minCostsFromDn = network.getMinCostFrom(dn);
+            List<StorageNode> sortedSns = network.getStorageNodes()
+                .stream()
+                .filter(minCostsFromDn::containsKey)
+                .sorted(Comparator.comparing(minCostsFromDn::get)
+                    .thenComparingInt(SensorNode::getId))
                 .toList();
-            for (Map.Entry<StorageNode, Long> pair : sortedSns) {
-                StorageNode sn = pair.getKey();
-                long minCost = pair.getValue();
-
+            for (StorageNode sn : sortedSns) {
                 if (!dn.hasEnergy() || dn.isEmpty()) {
                     break;
                 }
@@ -112,14 +120,21 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
                 }
 
                 long packetsToSend = Math.min(dn.getPacketsLeft(), sn.getSpaceLeft());
-                if (packetsToSend <= 0 || !network.canSendPackets(dn, sn, packetsToSend)) {
+                if (packetsToSend <= 0) {
                     continue;
                 }
 
+                // Lazily compute the path at send time (may reroute around depleted relays)
+                List<SensorNode> path = network.getMinCostPath(dn, sn);
+                if (path.size() < 2 || !network.canSendPacketsAlong(path, packetsToSend)) {
+                    continue;
+                }
+
+                long minCost = minCostsFromDn.get(sn);
                 this.totalValue += dn.getOverflowPacketValue() * packetsToSend;
                 this.totalCost += minCost * packetsToSend;
 
-                network.sendPackets(dn, sn, packetsToSend);
+                network.sendPacketsAlong(path, packetsToSend);
             }
         }
 

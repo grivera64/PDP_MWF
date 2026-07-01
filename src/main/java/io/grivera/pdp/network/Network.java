@@ -69,6 +69,15 @@ public interface Network {
     List<SensorNode> getMinCostPath(SensorNode from, SensorNode to);
 
     /**
+     * Returns the min-cost from the given sensor node to every other reachable
+     * sensor node.
+     *
+     * @param from the starting sensor node
+     * @return a map of sensor nodes to their min-cost from the starting node
+     */
+    Map<SensorNode, Long> getMinCostFrom(SensorNode from);
+
+    /**
      * Calculates the cost of a given path.
      *
      * @param path the path between two sensor nodes
