@@ -37,7 +37,8 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
 
         List<DataNode> sortedDns = network.getDataNodes()
             .parallelStream()
-            .sorted((dn1, dn2) -> -Long.compare(dn1.getOverflowPacketValue(), dn2.getOverflowPacketValue()))
+            .sorted(Comparator.comparingLong(DataNode::getOverflowPacketValue).reversed()
+                .thenComparingInt(DataNode::getId))
             .toList();
 
         // Process DataNodes sequentially
@@ -97,7 +98,8 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
         long runTime = -System.nanoTime();
         List<DataNode> sortedDns = network.getDataNodes()
             .parallelStream()
-            .sorted((dn1, dn2) -> -Long.compare(dn1.getOverflowPacketValue(), dn2.getOverflowPacketValue()))
+            .sorted(Comparator.comparingLong(DataNode::getOverflowPacketValue).reversed()
+                .thenComparingInt(DataNode::getId))
             .toList();
 
         // Process DataNodes sequentially
