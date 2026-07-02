@@ -41,10 +41,12 @@ public class MFAlgorithm extends NetworkAlgorithm {
         super(network);
     }
 
-    public void silentRun() {
+    @Override
+    public RunDetails silentRun() {
         super.silentRun();
-        this.solveIlp();
-        this.parseIlp();
+        long runTime = this.solveIlp();
+        long parseTime = this.parseIlp();
+        return new RunDetails(runTime, parseTime);
     }
 
     @Override

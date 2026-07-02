@@ -26,7 +26,8 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
         this.run();
     }
 
-    public void silentRun() {
+    @Override
+    public RunDetails silentRun() {
         super.silentRun();
         this.totalValue = 0;
         this.totalCost = 0;
@@ -35,6 +36,7 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
         
         Network network = this.getNetwork();
 
+        long runTime = -System.nanoTime();
         List<DataNode> sortedDns = network.getDataNodes()
             .parallelStream()
             .sorted(Comparator.comparingLong(DataNode::getOverflowPacketValue).reversed()
@@ -48,8 +50,8 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
             List<StorageNode> sortedSns = network.getStorageNodes()
                 .stream()
                 .filter(minCostsFromDn::containsKey)
-                .sorted(Comparator.comparing(minCostsFromDn::get)
-                    .thenComparingInt(SensorNode::getId))
+                .sorted(Comparator.comparing((StorageNode sn) -> minCostsFromDn.get(sn))
+                    .thenComparingInt(StorageNode::getId))
                 .toList();
             for (StorageNode sn : sortedSns) {
                 if (!dn.hasEnergy() || dn.isEmpty()) {
@@ -83,6 +85,9 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
             .parallelStream()
             .mapToLong(StorageNode::getUsedSpace)
             .sum();
+
+        runTime += System.nanoTime();
+        return new RunDetails(runTime, -1);
     }
 
     @Override
@@ -108,9 +113,9 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
             // Costs are distance-based (energy-independent); compute once per DN for sorting
             Map<SensorNode, Long> minCostsFromDn = network.getMinCostFrom(dn);
             List<StorageNode> sortedSns = network.getStorageNodes()
-                .stream()
+                .parallelStream()
                 .filter(minCostsFromDn::containsKey)
-                .sorted(Comparator.comparing(minCostsFromDn::get)
+                .sorted(Comparator.comparing((StorageNode sn) -> minCostsFromDn.get(sn))
                     .thenComparingInt(SensorNode::getId))
                 .toList();
             for (StorageNode sn : sortedSns) {

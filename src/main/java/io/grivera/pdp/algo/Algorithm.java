@@ -2,7 +2,7 @@ package io.grivera.pdp.algo;
 
 public interface Algorithm {
     RunDetails run();
-    void silentRun();
+    RunDetails silentRun();
     long getTotalValue();
     long getTotalCost();
     long getTotalProfit();

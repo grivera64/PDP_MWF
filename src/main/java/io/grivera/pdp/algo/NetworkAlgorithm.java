@@ -11,10 +11,11 @@ public abstract class NetworkAlgorithm implements Algorithm {
         this.network = network;
     }
 
-    public void silentRun() {
+    public RunDetails silentRun() {
         this.hasRan = true;
         this.network.resetPackets();
         this.network.resetEnergy();
+        return new RunDetails(0, 0);
     }
 
     @Override

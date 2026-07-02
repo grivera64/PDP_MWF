@@ -41,8 +41,8 @@ public class Cs2Algorithm extends NetworkAlgorithm {
         }
     }
 
-    public void silentRun() {
-        this.run();
+    public RunDetails silentRun() {
+        return this.run();
     }
 
     public RunDetails run() {
