@@ -61,13 +61,23 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
                     continue;
                 }
 
+                // Try to send as many packets as possible, decrementing until feasible
                 long packetsToSend = Math.min(dn.getPacketsLeft(), sn.getSpaceLeft());
                 if (packetsToSend <= 0) {
                     continue;
                 }
 
                 List<SensorNode> path = network.getMinCostPath(dn, sn);
-                if (path.size() < 2 || !network.canSendPacketsAlong(path, packetsToSend)) {
+                if (path.size() < 2) {
+                    continue;
+                }
+                while (!network.canSendPacketsAlong(path, packetsToSend)) {
+                    packetsToSend--;
+                    if (packetsToSend <= 0) {
+                        break;
+                    }
+                }
+                if (packetsToSend <= 0) {
                     continue;
                 }
 
@@ -126,6 +136,7 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
                     continue;
                 }
 
+                // Try to send as many packets as possible, decrementing until feasible
                 long packetsToSend = Math.min(dn.getPacketsLeft(), sn.getSpaceLeft());
                 if (packetsToSend <= 0) {
                     continue;
@@ -133,7 +144,16 @@ public class GreedyPriorityAlgorithm extends NetworkAlgorithm {
 
                 // Lazily compute the path at send time (may reroute around depleted relays)
                 List<SensorNode> path = network.getMinCostPath(dn, sn);
-                if (path.size() < 2 || !network.canSendPacketsAlong(path, packetsToSend)) {
+                if (path.size() < 2) {
+                    continue;
+                }
+                while (!network.canSendPacketsAlong(path, packetsToSend)) {
+                    packetsToSend--;
+                    if (packetsToSend <= 0) {
+                        break;
+                    }
+                }
+                if (packetsToSend <= 0) {
                     continue;
                 }
 
